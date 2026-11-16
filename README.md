@@ -1,56 +1,39 @@
-# Welcome to your Expo app 👋
+# DocTapp mobile app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This Expo React Native app uses the DocTapp Django API.
 
-## Get started
+## Configuration
 
-1. Install dependencies
+Set `EXPO_PUBLIC_API_BASE_URL` in `.env.local` when the default is not suitable:
 
-   ```bash
-   npm install
-   ```
+- iOS Simulator: `http://localhost:8000/api/v1`
+- Android Emulator: `http://10.0.2.2:8000/api/v1`
+- Physical device: `http://<computer-LAN-IP>:8000/api/v1`
 
-2. Start the app
+The app defaults to the iOS URL on iOS/web and the Android URL on Android. Never commit `.env.local`.
 
-   ```bash
-   npx expo start
-   ```
+## Backend
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+From the Django backend directory, install its dependencies, run migrations, and start:
 
 ```bash
-npm run reset-project
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+For a physical device, allow port 8000 through the computer firewall and use the computer's LAN IP.
 
-### Other setup steps
+## Authentication
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Tokens are stored in Expo SecureStore. Startup loads tokens and validates the session with `GET /accounts/me/`. Protected requests use the access token; one failed request triggers a single refresh, stores rotated tokens, and retries once. Refresh failure clears credentials and returns to sign in. Logout calls the backend and clears local credentials even if the request fails.
 
-## Learn more
+Available screens include sign in, registration, forgot/reset password, profile, edit profile, and change password. Backend validation and account-status errors are shown to the user.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Commands
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm install
+npx expo start
+npm run lint
+npx tsc --noEmit
+```

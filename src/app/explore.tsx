@@ -47,6 +47,7 @@ export default function TabTwoScreen() {
         <ThemedView style={styles.sectionsWrapper}>
             <ThemedText style={styles.centerText}>
               This is the Explore Doctor screen.
+              </ThemedText>
         </ThemedView>
         {Platform.OS === 'web' && <WebBadge />}
       </ThemedView>
