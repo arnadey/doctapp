@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { File } from 'expo-file-system';
 import { useAuth } from '@/context/auth';
 import { mediaUrl } from '@/config/api';
+import { ApiError } from '@/types/auth';
+
+function updateErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    const values = Object.values(error.payload).flatMap((value) =>
+      Array.isArray(value) ? value.map(String) : typeof value === 'string' ? [value] : [],
+    );
+    return values[0] ?? 'Unable to update your profile.';
+  }
+  return error instanceof Error ? error.message : 'Unable to update your profile.';
+}
 
 export default function EditProfileScreen() {
   const { user, updateUser } = useAuth();
@@ -16,15 +28,23 @@ export default function EditProfileScreen() {
     if (!result.canceled) setImage(result.assets[0]);
   };
   const submit = async () => {
+    setMessage('');
     try {
-      const body = new FormData();
-      body.append('first_name', firstName);
-      body.append('last_name', lastName);
-      body.append('phone_number', phone);
-      if (image) body.append('profile_image', { uri: image.uri, name: image.fileName ?? 'profile.jpg', type: image.mimeType ?? 'image/jpeg' } as unknown as Blob);
-      await updateUser(image ? body : { first_name: firstName, last_name: lastName, phone_number: phone });
+      if (image) {
+        const body = new FormData();
+        body.append('first_name', firstName);
+        body.append('last_name', lastName);
+        body.append('phone_number', phone);
+        const file = new File(image.uri);
+        body.append('profile_image', file as unknown as Blob);
+        await updateUser(body);
+      } else {
+        await updateUser({ first_name: firstName, last_name: lastName, phone_number: phone });
+      }
       setMessage('Profile updated.');
-    } catch { setMessage('Unable to update your profile.'); }
+    } catch (error) {
+      setMessage(updateErrorMessage(error));
+    }
   };
   return <View style={styles.container}>{(image?.uri || mediaUrl(user?.profile_image ?? null)) && <Image source={{ uri: image?.uri || mediaUrl(user?.profile_image ?? null) as string }} style={styles.image} />}<Button title="Choose profile image" onPress={() => void pickImage()} /><TextInput style={styles.input} value={firstName} onChangeText={setFirstName} placeholder="First name" /><TextInput style={styles.input} value={lastName} onChangeText={setLastName} placeholder="Last name" /><TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="Phone number" /><Button title="Save changes" onPress={() => void submit()} /><Text>{message}</Text></View>;
 }
