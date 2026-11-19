@@ -6,6 +6,7 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
   isRefreshRequest?: boolean;
   skipAuth?: boolean;
+  timeoutMs?: number;
 };
 
 let refreshPromise: Promise<AuthTokens | null> | null = null;
@@ -49,7 +50,7 @@ async function refreshTokens(): Promise<AuthTokens | null> {
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}, retry = true): Promise<T> {
-  const { isRefreshRequest, skipAuth, body, headers, ...init } = options;
+  const { isRefreshRequest, skipAuth, body, headers, timeoutMs = 20_000, ...init } = options;
   const requestHeaders = new Headers(headers);
   if (!(body instanceof FormData)) requestHeaders.set('Content-Type', 'application/json');
   if (!skipAuth) {
@@ -58,12 +59,38 @@ export async function request<T>(path: string, options: RequestOptions = {}, ret
   }
 
 
-  const response = await fetch(apiUrl(path), {
-    ...init,
-    method: init.method ?? 'GET',
-    headers: requestHeaders,
-    body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
-  });
+  const timeoutController = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const abortFromExternalSignal = () => timeoutController.abort();
+  init.signal?.addEventListener('abort', abortFromExternalSignal, { once: true });
+  if (init.signal?.aborted) timeoutController.abort();
+
+  timeoutId = setTimeout(() => {
+    timeoutController.abort();
+  }, timeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch(apiUrl(path), {
+      ...init,
+      signal: timeoutController.signal,
+      method: init.method ?? 'GET',
+      headers: requestHeaders,
+      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (error) {
+    if (timeoutController.signal.aborted && !init.signal?.aborted) {
+      throw new ApiError(408, { detail: 'The request timed out. Please try again.' });
+    }
+    if (init.signal?.aborted) {
+      throw error;
+    }
+    throw new ApiError(0, { detail: 'Unable to connect to the server. Check your network connection.' });
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+    init.signal?.removeEventListener('abort', abortFromExternalSignal);
+  }
 
   if (response.status === 401 && retry && !isRefreshRequest && !skipAuth) {
     const tokens = await refreshTokens();

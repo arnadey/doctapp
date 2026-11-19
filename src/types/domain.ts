@@ -20,17 +20,21 @@ export type PatientProfile = {
 
 export type Doctor = {
   id: string;
-  professional_name: string;
-  profile_picture: string | null;
-  bio: string;
-  specialty: string;
-  qualifications: string;
-  experience_years: number;
-  consultation_fee: string;
-  languages: unknown;
-  hospital_ids: string;
-  created_at: string;
-  updated_at: string;
+  professional_name?: string | null;
+  profile_picture?: string | null;
+  bio?: string | null;
+  specialty?: string | null;
+  specialization?: DoctorSpecialization | string | null;
+  qualifications?: string | null;
+  experience_years?: number | null;
+  consultation_fee?: string | number | null;
+  languages?: unknown;
+  hospital_ids?: string[] | string | null;
+  hospitals?: DoctorHospitalOption[] | null;
+  chambers?: Chamber[] | null;
+  verification_status?: 'APPROVED' | 'PENDING' | 'REJECTED' | string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export type DoctorWrite = {
@@ -79,23 +83,33 @@ export type Hospital = {
 
 export type Chamber = {
   id: string;
-  doctor_id: string;
-  hospital: string | null;
-  hospital_id: string | null;
-  chamber_name: string;
-  address: string;
-  consultation_fee_override: string | null;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
+  doctor_id?: string;
+  hospital?: DoctorHospitalOption | string | null;
+  hospital_id?: string | null;
+  chamber_name?: string | null;
+  address?: string | null;
+  consultation_fee_override?: string | number | null;
+  active?: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
-export type DoctorSpecialtyOption = string;
+export type DoctorSpecialization = {
+  id: string;
+  name: string;
+};
+
+export type DoctorSpecialtyOption = DoctorSpecialization | string;
 
 export type DoctorHospitalOption = {
   id: string;
   name: string;
-  address: string;
-  latitude: string | null;
-  longitude: string | null;
+  address?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+};
+
+export type DoctorFilterOptions = {
+  specializations: DoctorSpecialization[];
+  hospitals: DoctorHospitalOption[];
 };

@@ -38,9 +38,11 @@ export function formatLanguages(value: unknown): string {
 export function buildDoctorFilterQuery(filters: {
   search?: string;
   specialty?: string;
+  specializations?: string[];
   experienceYears?: number;
   consultationFee?: number;
   hospitalId?: string;
+  hospitalIds?: string[];
   location?: string;
   ordering?: string;
   page?: number;
@@ -48,10 +50,8 @@ export function buildDoctorFilterQuery(filters: {
   const params = new URLSearchParams();
   const values: Record<string, string | number | undefined> = {
     search: filters.search,
-    specialty: filters.specialty,
     experience_years: filters.experienceYears,
     consultation_fee: filters.consultationFee,
-    hospital: filters.hospitalId,
     location: filters.location,
     ordering: filters.ordering,
     page: filters.page,
@@ -59,7 +59,24 @@ export function buildDoctorFilterQuery(filters: {
   Object.entries(values).forEach(([key, value]) => {
     if (value !== undefined && value !== '' && value !== null) params.set(key, String(value));
   });
+  const specializations = filters.specializations?.length
+    ? filters.specializations
+    : filters.specialty ? [filters.specialty] : [];
+  const hospitalIds = filters.hospitalIds?.length
+    ? filters.hospitalIds
+    : filters.hospitalId ? [filters.hospitalId] : [];
+  if (specializations.length) params.set('specialization', specializations.join(','));
+  if (hospitalIds.length) params.set('hospital', hospitalIds.join(','));
   return params.toString();
+}
+
+export function normalizeSpecializationName(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && 'name' in value) {
+    const name = (value as { name?: unknown }).name;
+    if (typeof name === 'string') return name;
+  }
+  return '';
 }
 
 export function removeStaleSpecialty<T extends string>(

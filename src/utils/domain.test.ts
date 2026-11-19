@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ApiError } from '@/types/auth';
 import {
   buildDoctorFilterQuery, errorMessage, formatFee, formatLanguages,
-  removeStaleSpecialty, roleName,
+  normalizeSpecializationName, removeStaleSpecialty, roleName,
 } from '@/utils/domain';
 
 describe('domain utilities', () => {
@@ -34,11 +34,25 @@ describe('domain utilities', () => {
       hospitalId: 'hospital-123',
       page: 2,
       experienceYears: undefined,
-    })).toBe('search=heart&specialty=Cardiology&hospital=hospital-123&page=2');
+    })).toBe('search=heart&page=2&specialization=Cardiology&hospital=hospital-123');
   });
 
   it('removes cleared filter parameters', () => {
     expect(buildDoctorFilterQuery({ specialty: '', hospitalId: undefined })).toBe('');
+  });
+
+  it('builds repeated specialization and hospital filters', () => {
+    expect(buildDoctorFilterQuery({
+      search: 'heart',
+      specializations: ['Cardiology', 'Neurology'],
+      hospitalIds: ['hospital-1', 'hospital-2'],
+      page: 2,
+    })).toBe('search=heart&page=2&specialization=Cardiology%2CNeurology&hospital=hospital-1%2Chospital-2');
+  });
+
+  it('normalizes specialization objects and strings', () => {
+    expect(normalizeSpecializationName('Cardiology')).toBe('Cardiology');
+    expect(normalizeSpecializationName({ id: 'Cardiology', name: 'Cardiology' })).toBe('Cardiology');
   });
 
   it('clears a stale specialty selection', () => {

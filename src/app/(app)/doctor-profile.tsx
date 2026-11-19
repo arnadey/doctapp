@@ -28,9 +28,14 @@ export default function DoctorProfileScreen() {
   useEffect(() => {
     if (!user || roleName(user.role) !== 'doctor') return;
     domainApi.doctorMe().then((value) => {
-      setDoctor(value); setProfessionalName(value.professional_name); setBio(value.bio);
-      setSpecialty(value.specialty); setQualifications(value.qualifications);
-      setExperience(String(value.experience_years ?? '')); setFee(value.consultation_fee);
+      setDoctor(value); setProfessionalName(value.professional_name ?? '');
+      setBio(value.bio ?? '');
+      setSpecialty(value.specialty ?? '');
+      setQualifications(value.qualifications ?? '');
+      setExperience(String(value.experience_years ?? ''));
+      setFee(typeof value.consultation_fee === 'number'
+        ? String(value.consultation_fee)
+        : value.consultation_fee ?? '');
       setLanguages(Array.isArray(value.languages) ? value.languages.join(', ') : typeof value.languages === 'string' ? value.languages : '');
     }).catch((reason) => setMessage(errorMessage(reason, 'Unable to load doctor profile.')))
       .finally(() => setLoading(false));

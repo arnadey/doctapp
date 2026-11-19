@@ -23,6 +23,17 @@ python manage.py runserver 0.0.0.0:8000
 
 For a physical device, allow port 8000 through the computer firewall and use the computer's LAN IP.
 
+## Doctor discovery
+
+The Explore Doctor tab loads public approved doctors from `GET /api/v1/doctors/`.
+Filter options are loaded from `GET /api/v1/doctors/filter-options/`, with the compatibility
+endpoints `/api/v1/doctors/specialties/` and `/api/v1/doctors/hospitals/` used only if the
+combined endpoint is unavailable.
+
+The screen sends `search`, `specialization`, `hospital`, `ordering`, `page`, and `page_size`
+query parameters. Specialization names and hospital UUIDs come from the filter-options API;
+they are not hardcoded in the app.
+
 ## Authentication
 
 Tokens are stored in Expo SecureStore. Startup loads tokens and validates the session with `GET /accounts/me/`. Protected requests use the access token; one failed request triggers a single refresh, stores rotated tokens, and retries once. Refresh failure clears credentials and returns to sign in. Logout calls the backend and clears local credentials even if the request fails.

@@ -1,34 +1,53 @@
 import { request } from '@/api/client';
 import type {
   Chamber, Doctor, DoctorAssistant, DoctorAssistantCreate,
-  DoctorHospitalOption, DoctorSpecialtyOption, Hospital, Paginated, PatientProfile,
+  DoctorFilterOptions, DoctorHospitalOption, DoctorSpecialtyOption, Hospital, Paginated, PatientProfile,
 } from '@/types/domain';
+
+export type FilterOptionsResponse = DoctorFilterOptions;
 
 export type DoctorFilters = {
   search?: string;
   specialty?: string;
+  specialization?: string[];
   experience_years?: number;
   consultation_fee?: number;
-  hospital?: string;
+  hospital?: string[];
   location?: string;
   ordering?: string;
   page?: number;
+  page_size?: number;
 };
 
 export const domainApi = {
   patientMe: () => request<PatientProfile>('/patients/me/'),
   updatePatientMe: (body: Record<string, unknown> | FormData) =>
     request<PatientProfile>('/patients/me/', { method: 'PATCH', body }),
-  doctors: (filters: DoctorFilters = {}) => {
+  doctors: (filters: DoctorFilters = {}, signal?: AbortSignal) => {
     const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== '' && value !== null) params.set(key, String(value));
-    });
+    if (filters.search) params.set('search', filters.search);
+    if (filters.specialization?.length) {
+      params.set('specialization', filters.specialization.join(','));
+    } else if (filters.specialty) {
+      params.set('specialization', filters.specialty);
+    }
+    if (filters.hospital?.length) params.set('hospital', filters.hospital.join(','));
+    if (filters.location) params.set('location', filters.location);
+    if (filters.ordering) params.set('ordering', filters.ordering);
+    if (filters.experience_years !== undefined) params.set('experience_years', String(filters.experience_years));
+    if (filters.consultation_fee !== undefined) params.set('consultation_fee', String(filters.consultation_fee));
+    if (filters.page) params.set('page', String(filters.page));
+    if (filters.page_size) params.set('page_size', String(filters.page_size));
     const query = params.toString();
-    return request<Paginated<Doctor>>(`/doctors/${query ? `?${query}` : ''}`);
+    return request<Paginated<Doctor>>(`/doctors/${query ? `?${query}` : ''}`, {
+      skipAuth: true,
+      signal,
+    });
   },
-  doctor: (id: string) => request<Doctor>(`/doctors/${id}/`),
+  doctor: (id: string) => request<Doctor>(`/doctors/${id}/`, { skipAuth: true }),
   doctorMe: () => request<Doctor>('/doctors/me/'),
+  doctorFilterOptions: () =>
+    request<import('@/types/domain').DoctorFilterOptions>('/doctors/filter-options/', { skipAuth: true }),
   doctorSpecialties: () =>
     request<DoctorSpecialtyOption[]>('/doctors/specialties/', { skipAuth: true }),
   doctorHospitals: () =>

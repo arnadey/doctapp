@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/ui": "~58.0.28",
-    "@react-native-community/datetimepicker": "9.2.1",
+    "@react-native-community/datetimepicker": "^9.2.1",
     "@types/jest": "30.0.0",
     "expo": "~58.0.25",
     "expo-constants": "~58.0.16",
