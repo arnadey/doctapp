@@ -29,6 +29,22 @@ Tokens are stored in Expo SecureStore. Startup loads tokens and validates the se
 
 Available screens include sign in, registration, forgot/reset password, profile, edit profile, and change password. Backend validation and account-status errors are shown to the user.
 
+## Core domain features
+
+The app includes role-aware patient, doctor, assistant, hospital, and chamber workflows:
+
+- Patient users can load and edit only `GET/PATCH /api/v1/patients/me/`.
+- Public and authenticated users can browse the approved doctor listing and doctor details.
+- Doctors can edit only `PATCH /api/v1/doctors/me/`, manage assistants, and manage their chambers.
+- Assistants can view active associated doctors and only receive chamber actions permitted by the server relationship.
+- Public users can browse hospitals and public chamber information.
+- Doctor verification status is shown as account status and has no verification edit control.
+- Public registration creates a patient account. Doctor and assistant roles are assigned through backend administration and cannot be selected in the registration form.
+
+Navigation routes are defined under `src/app/(app)/`; typed API models and services are in `src/types/domain.ts` and `src/api/domain.ts`.
+
+The API client adds JWT access tokens automatically, retries one request after a successful refresh, and clears the secure session and redirects to login when refresh authentication fails.
+
 ## Commands
 
 ```bash

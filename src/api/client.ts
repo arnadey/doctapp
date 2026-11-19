@@ -37,8 +37,8 @@ async function refreshTokens(): Promise<AuthTokens | null> {
       });
       if (!response.ok) return null;
       const payload = (await parseResponse(response)) as Partial<AuthTokens>;
-      if (!payload.access || !payload.refresh) return null;
-      const next = { access: payload.access, refresh: payload.refresh };
+      if (!payload.access) return null;
+      const next = { access: payload.access, refresh: payload.refresh ?? current.refresh };
       await saveTokens(next);
       return next;
     })().finally(() => {
@@ -48,7 +48,7 @@ async function refreshTokens(): Promise<AuthTokens | null> {
   return refreshPromise;
 }
 
-async function request<T>(path: string, options: RequestOptions = {}, retry = true): Promise<T> {
+export async function request<T>(path: string, options: RequestOptions = {}, retry = true): Promise<T> {
   const { isRefreshRequest, skipAuth, body, headers, ...init } = options;
   const requestHeaders = new Headers(headers);
   if (!(body instanceof FormData)) requestHeaders.set('Content-Type', 'application/json');
@@ -56,6 +56,7 @@ async function request<T>(path: string, options: RequestOptions = {}, retry = tr
     const tokens = await loadTokens();
     if (tokens) requestHeaders.set('Authorization', `Bearer ${tokens.access}`);
   }
+
 
   const response = await fetch(apiUrl(path), {
     ...init,
