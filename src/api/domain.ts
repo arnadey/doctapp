@@ -1,7 +1,7 @@
 import { request } from '@/api/client';
 import type {
   Chamber, Doctor, DoctorAssistant, DoctorAssistantCreate,
-  Hospital, Paginated, PatientProfile,
+  DoctorHospitalOption, DoctorSpecialtyOption, Hospital, Paginated, PatientProfile,
 } from '@/types/domain';
 
 export type DoctorFilters = {
@@ -29,6 +29,10 @@ export const domainApi = {
   },
   doctor: (id: string) => request<Doctor>(`/doctors/${id}/`),
   doctorMe: () => request<Doctor>('/doctors/me/'),
+  doctorSpecialties: () =>
+    request<DoctorSpecialtyOption[]>('/doctors/specialties/', { skipAuth: true }),
+  doctorHospitals: () =>
+    request<DoctorHospitalOption[]>('/doctors/hospitals/', { skipAuth: true }),
   updateDoctorMe: (body: Record<string, unknown> | FormData) =>
     request<import('@/types/domain').DoctorWrite>('/doctors/me/', { method: 'PATCH', body }),
   assistantDoctors: () => request<Paginated<Doctor>>('/assistants/me/doctors/'),

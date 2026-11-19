@@ -89,3 +89,13 @@ export type Chamber = {
   created_at: string;
   updated_at: string;
 };
+
+export type DoctorSpecialtyOption = string;
+
+export type DoctorHospitalOption = {
+  id: string;
+  name: string;
+  address: string;
+  latitude: string | null;
+  longitude: string | null;
+};

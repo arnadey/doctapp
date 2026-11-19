@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { File } from 'expo-file-system';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerChangeEvent } from '@react-native-community/datetimepicker';
 
 import { domainApi } from '@/api/domain';
 import { mediaUrl } from '@/config/api';
@@ -29,9 +29,9 @@ export default function EditProfileScreen() {
     ? new Date(`${dateOfBirth}T12:00:00`)
     : new Date(2000, 0, 1);
 
-  const onBirthDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+  const onBirthDateChange = (_event: DateTimePickerChangeEvent, selectedDate: Date) => {
     if (Platform.OS !== 'ios') setShowDatePicker(false);
-    if (event.type === 'dismissed' || !selectedDate) return;
+    if (!selectedDate) return;
     const year = selectedDate.getFullYear();
     const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
     const day = String(selectedDate.getDate()).padStart(2, '0');
@@ -103,7 +103,8 @@ export default function EditProfileScreen() {
       mode="date"
       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
       maximumDate={new Date()}
-      onChange={onBirthDateChange}
+      onValueChange={onBirthDateChange}
+      onDismiss={() => setShowDatePicker(false)}
     />}
     <TextInput style={styles.input} value={gender} onChangeText={setGender} placeholder="Gender" />
     <TextInput style={[styles.input, styles.multiline]} value={address} onChangeText={setAddress} placeholder="Address" multiline />

@@ -34,3 +34,37 @@ export function formatLanguages(value: unknown): string {
   if (Array.isArray(value)) return value.map(String).join(', ') || 'Not listed';
   return typeof value === 'string' && value ? value : 'Not listed';
 }
+
+export function buildDoctorFilterQuery(filters: {
+  search?: string;
+  specialty?: string;
+  experienceYears?: number;
+  consultationFee?: number;
+  hospitalId?: string;
+  location?: string;
+  ordering?: string;
+  page?: number;
+}): string {
+  const params = new URLSearchParams();
+  const values: Record<string, string | number | undefined> = {
+    search: filters.search,
+    specialty: filters.specialty,
+    experience_years: filters.experienceYears,
+    consultation_fee: filters.consultationFee,
+    hospital: filters.hospitalId,
+    location: filters.location,
+    ordering: filters.ordering,
+    page: filters.page,
+  };
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined && value !== '' && value !== null) params.set(key, String(value));
+  });
+  return params.toString();
+}
+
+export function removeStaleSpecialty<T extends string>(
+  selected: T,
+  available: T[],
+): T | '' {
+  return available.includes(selected) ? selected : '';
+}

@@ -1,6 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
 import { ApiError } from '@/types/auth';
-import { errorMessage, formatFee, formatLanguages, roleName } from '@/utils/domain';
+import {
+  buildDoctorFilterQuery, errorMessage, formatFee, formatLanguages,
+  removeStaleSpecialty, roleName,
+} from '@/utils/domain';
 
 describe('domain utilities', () => {
   it('normalizes role names', () => {
@@ -22,5 +25,23 @@ describe('domain utilities', () => {
   it('normalizes validation field errors', () => {
     const error = new ApiError(400, { address: ['This field is required.'] });
     expect(errorMessage(error)).toBe('address: This field is required.');
+  });
+
+  it('builds only active doctor filter query parameters', () => {
+    expect(buildDoctorFilterQuery({
+      search: 'heart',
+      specialty: 'Cardiology',
+      hospitalId: 'hospital-123',
+      page: 2,
+      experienceYears: undefined,
+    })).toBe('search=heart&specialty=Cardiology&hospital=hospital-123&page=2');
+  });
+
+  it('removes cleared filter parameters', () => {
+    expect(buildDoctorFilterQuery({ specialty: '', hospitalId: undefined })).toBe('');
+  });
+
+  it('clears a stale specialty selection', () => {
+    expect(removeStaleSpecialty('Cardiology', ['Dermatology'])).toBe('');
   });
 });

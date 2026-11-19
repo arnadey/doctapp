@@ -43,6 +43,8 @@ The app includes role-aware patient, doctor, assistant, hospital, and chamber wo
 
 Navigation routes are defined under `src/app/(app)/`; typed API models and services are in `src/types/domain.ts` and `src/api/domain.ts`.
 
+Doctor search loads public specialty and approved-hospital options from `/api/v1/doctors/specialties/` and `/api/v1/doctors/hospitals/`. The filter sheet submits specialty names and hospital UUIDs only; stale selections are removed after option refresh.
+
 The API client adds JWT access tokens automatically, retries one request after a successful refresh, and clears the secure session and redirects to login when refresh authentication fails.
 
 ## Commands

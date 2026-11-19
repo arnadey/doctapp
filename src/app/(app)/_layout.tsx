@@ -15,6 +15,6 @@ export default function AppLayout() {
     <Stack.Screen name="chambers" options={{ headerShown: true, title: 'Chambers' }} />
     <Stack.Screen name="hospitals" options={{ headerShown: true, title: 'Hospitals' }} />
     <Stack.Screen name="associated-doctors" options={{ headerShown: true, title: 'Associated doctors' }} />
-    <Stack.Screen name="doctor" options={{ headerShown: false }} />
+    <Stack.Screen name="doctor/[id]" options={{ headerShown: true, title: 'Doctor' }} />
   </Stack>;
 }
