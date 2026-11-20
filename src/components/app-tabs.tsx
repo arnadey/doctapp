@@ -2,10 +2,14 @@ import { NativeTabs } from 'expo-router/native-tabs';
 import { useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
+import { useAuth } from '@/context/auth';
+import { roleName } from '@/utils/domain';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const { user } = useAuth();
+  const role = user ? roleName(user.role) : '';
 
   return (
     <NativeTabs
@@ -28,7 +32,7 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{role === 'doctor' ? 'Manage' : role === 'assistant' ? 'Doctors' : 'Profile'}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.crop.circle" />
       </NativeTabs.Trigger>
     </NativeTabs>

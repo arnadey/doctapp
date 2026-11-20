@@ -10,5 +10,11 @@ export default function AppLayout() {
     <Stack.Screen name="(tabs)" />
     <Stack.Screen name="edit-profile" options={{ headerShown: true, title: 'Edit profile' }} />
     <Stack.Screen name="change-password" options={{ headerShown: true, title: 'Change password' }} />
+    <Stack.Screen name="doctor-profile" options={{ headerShown: true, title: 'Doctor profile' }} />
+    <Stack.Screen name="assistants" options={{ headerShown: true, title: 'Assistants' }} />
+    <Stack.Screen name="chambers" options={{ headerShown: true, title: 'Chambers' }} />
+    <Stack.Screen name="hospitals" options={{ headerShown: true, title: 'Hospitals' }} />
+    <Stack.Screen name="associated-doctors" options={{ headerShown: true, title: 'Associated doctors' }} />
+    <Stack.Screen name="doctor/[id]" options={{ headerShown: true, title: 'Doctor' }} />
   </Stack>;
 }
